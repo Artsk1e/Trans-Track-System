@@ -123,18 +123,3 @@ The system is built on a **11-table PostgreSQL relational database** designed fo
 
 ---
 
-## 🚀 Quick Start & Database Setup
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-org/Trans-Track-System.git
-   cd Trans-Track-System
-   ```
-
-2. **Initialize PostgreSQL Database**:
-   ```bash
-   psql -U postgres -d trans_track_db -f schema/init.sql
-   ```
-
-3. **Check Database Schema Documentation**:
-   Refer to `schema/README.md` and `trans_track_erd.md` for full schema specifications and relationship diagrams.
