@@ -1,10 +1,10 @@
-# 🚢 Trans-Track: Operational Fleet & Cargo Visibility System
+# Trans-Track: Operational Fleet & Cargo Visibility System
 
 > **A logistics command center for Trans-Asia Shipping Lines (Iligan City Branch) bridging ground-truth maritime operations and executive digital oversight.**
 
 ---
 
-## 📌 Executive Summary
+## Executive Summary
 
 **Trans-Track** is a role-based logistics web application designed for **Trans-Asia Shipping Lines** (Iligan City Branch) to resolve severe information asymmetry and key-person dependency centered on the Officer-in-Charge (OIC) and Branch Manager.
 
@@ -12,7 +12,7 @@ While executive-level financial metrics are successfully digitized, daily ground
 
 ---
 
-## 💥 The Core Problems Solved
+## The Core Problems Solved
 
 | Operational Crisis | Impact | Trans-Track Solution |
 | :--- | :--- | :--- |
@@ -23,7 +23,7 @@ While executive-level financial metrics are successfully digitized, daily ground
 
 ---
 
-## 🏗️ System Architecture & 3-Tier Module Breakdown
+## System Architecture & 3-Tier Module Breakdown
 
 ```
                        +-----------------------------------+
@@ -40,23 +40,23 @@ While executive-level financial metrics are successfully digitized, daily ground
 +------------------+           +-------------------+           +-------------------+
 ```
 
-### 1. 🚛 Driver SMS Tracking (Field Operations View)
+### 1. Driver SMS Tracking (Field Operations View)
 * **Zero App Installation**: Drivers receive an expiring tracking link via SMS.
 * **Dual Telemetry**: Tapping the link pings browser GPS coordinates; a two-way SMS fallback handles low-data mobile coverage.
 * **Proactive Deck Allocation**: Feeds accurate ETAs into the OIC Dispatch Dashboard, allowing loadmasters to pre-assign ship deck space before trucks hit the pier.
 
-### 2. 🌐 Trans-Serve Client Portal (Client View)
+### 2. Trans-Serve Client Portal (Client View)
 * **Self-Service Tracker**: Customers enter their waybill number to monitor cargo progression across 7 standardized lifecycle stages.
 * **Vessel Schedule Board**: Public display of active voyage schedules and departure times.
 * **Auto-Responder Integration**: SMS/Viber auto-responders automatically redirect client inquiries to the portal.
 
-### 3. 📊 Executive Capacity Dashboard (Executive View)
+### 3. Executive Capacity Dashboard (Executive View)
 * **Live Deck & Cabin Monitoring**: Real-time read-only view of remaining vessel deck square footage (`total_deck_sqft`) and cabin room accommodations.
 * **Auto-Deduction Engine**: Deducts cargo square footage and booked rooms the exact second a waybill is generated at the gate.
 
 ---
 
-## 🔄 3-Phase Operational Workflow
+## 3-Phase Operational Workflow
 
 ### **Phase 1: Fleet Tracking & Deck Allocation**
 1. Automated SMS tracking link sent to the driver's mobile device.
@@ -75,7 +75,7 @@ While executive-level financial metrics are successfully digitized, daily ground
 
 ---
 
-## 🗄️ Relational Database Architecture
+## Relational Database Architecture
 
 The system is built on a **11-table PostgreSQL relational database** designed for low-bandwidth environments at the pier:
 
@@ -114,7 +114,7 @@ The system is built on a **11-table PostgreSQL relational database** designed fo
 
 ---
 
-## 🛠️ Tech Stack & Prerequisites
+## Tech Stack & Prerequisites
 
 * **Frontend**: React.js, Tailwind CSS
 * **Backend**: Node.js, Express.js
