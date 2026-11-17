@@ -79,42 +79,8 @@ CREATE TABLE waybill_statuses (
 );
 
 -- ============================================================================
--- INITIAL SEED INSERTS (LOOKUP TABLES)
--- ============================================================================
-
-INSERT INTO payment_statuses (payment_code, payment_name) VALUES
-    ('UNPAID', 'Unpaid'),
-    ('PAID', 'Paid'),
-    ('PARTIAL', 'Partially Paid'),
-    ('REFUNDED', 'Refunded')
-ON CONFLICT (payment_code) DO NOTHING;
-
-INSERT INTO waybill_statuses (status_code, status_name, description, sequence_order) VALUES
-    ('BOOKED', 'Booked', 'Cargo booking has been registered and allocated to a voyage.', 1),
-    ('EN_ROUTE', 'En Route', 'Truck is traveling toward the port terminal.', 2),
-    ('GATE_CHECKED_IN', 'Gate Checked In', 'Truck has arrived at the port gate and passed initial entry processing.', 3),
-    ('STAGED', 'Staged', 'Cargo is staged in the port yard awaiting vessel loading.', 4),
-    ('LOADED', 'Loaded', 'Cargo has been successfully loaded onto the vessel deck.', 5),
-    ('IN_TRANSIT', 'In Transit', 'Vessel has departed and is currently traveling to the destination port.', 6),
-    ('DELIVERED', 'Delivered', 'Cargo has arrived at the destination port and been handed over to the consignee.', 7)
-ON CONFLICT (status_code) DO NOTHING;
-
--- ============================================================================
 -- 2. CORE OPERATIONAL ENTITIES
 -- ============================================================================
-
-CREATE TABLE voyages (
-    voyage_id SERIAL PRIMARY KEY,
-    vessel_id INT NOT NULL REFERENCES vessels(vessel_id) ON DELETE RESTRICT,
-    origin_port_id INT NOT NULL REFERENCES ports(port_id) ON DELETE RESTRICT,
-    destination_port_id INT NOT NULL REFERENCES ports(port_id) ON DELETE RESTRICT,
-    voyage_number VARCHAR(50) UNIQUE NOT NULL,
-    departure TIMESTAMP NOT NULL,
-    estimated_arrival TIMESTAMP NOT NULL,
-    remaining_sqft DECIMAL(10,2) NOT NULL,
-    remaining_rooms INT NOT NULL,
-    voyage_status voyage_status_enum NOT NULL DEFAULT 'SCHEDULED'
-);
 
 CREATE TABLE clients (
     client_id SERIAL PRIMARY KEY,
@@ -132,6 +98,19 @@ CREATE TABLE users (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     role user_role_enum NOT NULL
+);
+
+CREATE TABLE voyages (
+    voyage_id SERIAL PRIMARY KEY,
+    vessel_id INT NOT NULL REFERENCES vessels(vessel_id) ON DELETE RESTRICT,
+    origin_port_id INT NOT NULL REFERENCES ports(port_id) ON DELETE RESTRICT,
+    destination_port_id INT NOT NULL REFERENCES ports(port_id) ON DELETE RESTRICT,
+    voyage_number VARCHAR(50) UNIQUE NOT NULL,
+    departure TIMESTAMP NOT NULL,
+    estimated_arrival TIMESTAMP NOT NULL,
+    remaining_sqft DECIMAL(10,2) NOT NULL,
+    remaining_rooms INT NOT NULL,
+    voyage_status voyage_status_enum NOT NULL DEFAULT 'SCHEDULED'
 );
 
 CREATE TABLE waybills (
@@ -201,3 +180,44 @@ CREATE INDEX idx_waybills_consignee ON waybills(consignee_id);
 CREATE INDEX idx_waybill_logs_waybill ON waybill_status_log(waybill_id);
 CREATE INDEX idx_truck_arrivals_waybill ON truck_arrivals(waybill_id);
 CREATE INDEX idx_location_pings_arrival ON driver_location_pings(arrival_id);
+
+-- ============================================================================
+-- INITIAL SEED INSERTS (LOOKUP TABLES)
+-- ============================================================================
+
+INSERT INTO payment_statuses (payment_code, payment_name) VALUES
+    ('UNPAID', 'Unpaid'),
+    ('PAID', 'Paid'),
+    ('PARTIAL', 'Partially Paid'),
+    ('REFUNDED', 'Refunded')
+ON CONFLICT (payment_code) DO NOTHING;
+
+INSERT INTO waybill_statuses (status_code, status_name, description, sequence_order) VALUES
+    ('BOOKED', 'Booked', 'Cargo booking has been registered and allocated to a voyage.', 1),
+    ('EN_ROUTE', 'En Route', 'Truck is traveling toward the port terminal.', 2),
+    ('GATE_CHECKED_IN', 'Gate Checked In', 'Truck has arrived at the port gate and passed initial entry processing.', 3),
+    ('STAGED', 'Staged', 'Cargo is staged in the port yard awaiting vessel loading.', 4),
+    ('LOADED', 'Loaded', 'Cargo has been successfully loaded onto the vessel deck.', 5),
+    ('IN_TRANSIT', 'In Transit', 'Vessel has departed and is currently traveling to the destination port.', 6),
+    ('DELIVERED', 'Delivered', 'Cargo has arrived at the destination port and been handed over to the consignee.', 7)
+ON CONFLICT (status_code) DO NOTHING;
+
+-- ============================================================================
+-- INITIAL SEED INSERTS (ADMIN USER)
+-- ============================================================================
+
+INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
+    ('admin', '$2b$10$super_secret_admin_password', 'Admin', 'Admin', 'ADMIN')
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
+    ('oic', '$2b$10$super_secret_oic_password', 'OIC', 'Loadmaster', 'OIC_LOADMASTER')
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
+    ('exec', '$2b$10$super_secret_exec_password', 'Executive', 'Manager', 'EXECUTIVE')
+ON CONFLICT (username) DO NOTHING;
+
+INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
+    ('clerk', '$2b$10$super_secret_clerk_password', 'Gate', 'Clerk', 'GATE_CLERK')
+ON CONFLICT (username) DO NOTHING;
