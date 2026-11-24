@@ -1,6 +1,9 @@
 const pool = require('../db');
+const Waybill = require('../models/Waybill');
+const WaybillStatusLog = require('../models/WaybillStatusLog');
+const DriverLocationPing = require('../models/DriverLocationPing');
 
-// Service for OIC Loadmaster Role
+// Service for OIC Loadmaster Role — orchestrates Waybill transitions and telemetry
 const OicService = {
   async getVoyages(status) {
     // Queries the secure view instead of direct table
@@ -43,11 +46,11 @@ const OicService = {
     try {
       await client.query('BEGIN');
 
-      const loadedStatus = await client.query(
+      const loadedStatusId = (await client.query(
         'SELECT status_id FROM waybill_statuses WHERE status_code = $1',
         ['LOADED']
-      );
-      if (loadedStatus.rows.length === 0) {
+      )).rows[0]?.status_id;
+      if (!loadedStatusId) {
         throw Object.assign(new Error('LOADED status not found'), { statusCode: 500 });
       }
 
@@ -57,14 +60,15 @@ const OicService = {
           `UPDATE waybills SET current_status_id = $1
            WHERE waybill_id = $2 AND voyage_id = $3
            RETURNING waybill_id`,
-          [loadedStatus.rows[0].status_id, wid, voyageId]
+          [loadedStatusId, wid, voyageId]
         );
         if (upd.rows.length > 0) {
-          await client.query(
-            `INSERT INTO waybill_status_log (waybill_id, updated_by_user, new_status_id, remarks)
-             VALUES ($1, $2, $3, 'Loaded onto vessel')`,
-            [wid, userId, loadedStatus.rows[0].status_id]
-          );
+          await WaybillStatusLog.create(client, {
+            waybill_id: wid,
+            updated_by_user: userId,
+            new_status_id: loadedStatusId,
+            remarks: 'Loaded onto vessel'
+          });
           loaded.push(upd.rows[0].waybill_id);
         }
       }
@@ -90,7 +94,7 @@ const OicService = {
   },
 
   async getActiveDrivers() {
-    // Drivers currently en route / checked in with latest telemetry
+    // Drivers with their latest telemetry ping (TruckArrival + DriverLocationPing)
     const query = `
       SELECT DISTINCT ON (ta.arrival_id)
         ta.arrival_id,
