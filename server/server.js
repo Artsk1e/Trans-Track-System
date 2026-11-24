@@ -37,6 +37,7 @@ const executiveRoutes = require('./routes/executiveRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
 const waybillRoutes = require('./routes/waybillRoutes');
+const masterRoutes = require('./routes/masterRoutes');
 // ...
 app.use('/api/auth', authRoutes);
 app.use('/api/gate', gateRoutes);
@@ -45,6 +46,7 @@ app.use('/api/executive', executiveRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/waybills', waybillRoutes);
+app.use('/api/master', masterRoutes);
 // Legacy alias for existing frontend calls
 app.use('/api/operations', gateRoutes);
 
