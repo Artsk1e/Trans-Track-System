@@ -1,33 +1,48 @@
 const pool = require('../db');
 
-// User model to interact with the 'users' table
 class User {
-  static async findAll() {
-    const query = 'SELECT user_id, username, first_name, last_name, role FROM users ORDER BY user_id ASC';
-    const result = await pool.query(query);
-    return result.rows;
+  constructor(row = {}) {
+    Object.assign(this, row);
+  }
+
+  static async all() {
+    const r = await pool.query(
+      'SELECT user_id, username, first_name, last_name, role FROM users ORDER BY user_id ASC'
+    );
+    return r.rows.map((row) => new User(row));
   }
 
   static async findByUsername(username) {
-    const query = 'SELECT * FROM users WHERE username = $1';
-    const values = [username];
-    const result = await pool.query(query, values);
-    return result.rows[0];
+    const r = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    return r.rows[0] ? new User(r.rows[0]) : null;
   }
 
   static async findById(userId) {
-    const query = 'SELECT user_id, username, first_name, last_name, role FROM users WHERE user_id = $1';
-    const values = [userId];
-    const result = await pool.query(query, values);
-    return result.rows[0];
+    const r = await pool.query(
+      'SELECT user_id, username, first_name, last_name, role FROM users WHERE user_id = $1',
+      [userId]
+    );
+    return r.rows[0] ? new User(r.rows[0]) : null;
   }
 
-  static async create(userData) {
-    const { username, password_hash, first_name, last_name, role } = userData;
-    const query = 'INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, username, first_name, last_name, role';
-    const values = [username, password_hash, first_name, last_name, role];
-    const result = await pool.query(query, values);
-    return result.rows[0];
+  static async create({ username, password_hash, first_name, last_name, role }) {
+    const r = await pool.query(
+      'INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES ($1, $2, $3, $4, $5) RETURNING user_id, username, first_name, last_name, role',
+      [username, password_hash, first_name, last_name, role]
+    );
+    return new User(r.rows[0]);
+  }
+
+  // verifyPassword(plainPassword) from the class diagram
+  async verifyPassword(plainPassword) {
+    const bcrypt = require('bcrypt');
+    if (!this.password_hash) return false;
+    return bcrypt.compare(plainPassword, this.password_hash);
+  }
+
+  // authorize(requiredRole) from the class diagram — ADMIN passes everything
+  authorize(requiredRole) {
+    return this.role === requiredRole || this.role === 'ADMIN';
   }
 }
 
