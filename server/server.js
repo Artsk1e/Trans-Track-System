@@ -31,10 +31,22 @@ app.use('/api/', limiter);
 app.use(express.json());
 
 const authRoutes = require('./routes/authRoutes');
-const operationsRoutes = require('./routes/operationsRoutes');
+const gateRoutes = require('./routes/gateRoutes');
+const oicRoutes = require('./routes/oicRoutes');
+const executiveRoutes = require('./routes/executiveRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const publicRoutes = require('./routes/publicRoutes');
+const waybillRoutes = require('./routes/waybillRoutes');
 // ...
 app.use('/api/auth', authRoutes);
-app.use('/api/operations', operationsRoutes);
+app.use('/api/gate', gateRoutes);
+app.use('/api/oic', oicRoutes);
+app.use('/api/executive', executiveRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/waybills', waybillRoutes);
+// Legacy alias for existing frontend calls
+app.use('/api/operations', gateRoutes);
 
 
 app.get('/api/test-db', async (req, res) => {

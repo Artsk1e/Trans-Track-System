@@ -34,11 +34,41 @@ class AutoDeductionEngine {
     return result.rows[0];
   }
 
+  // Generates a sequential waybill ID: WB-YYYY-NNNNNN
+  async generateWaybillId(client) {
+    const year = new Date().getFullYear();
+    const prefix = `WB-${year}-`;
+    const res = await client.query(
+      `SELECT COALESCE(MAX(waybill_id), $1) AS last FROM waybills WHERE waybill_id LIKE $2`,
+      [prefix + '000000', prefix + '%']
+    );
+    const lastNum = parseInt(res.rows[0].last.slice(-6), 10) || 0;
+    return prefix + String(lastNum + 1).padStart(6, '0');
+  }
+
   // Orchestrates the booking of a waybill and automatic capacity deduction atomically.
+  // Throws on failure; rolls back entirely (waybill insert + capacity deduction).
   async bookWaybill(waybillData) {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+
+      // Resolve reference statuses
+      const bookedStatus = await client.query(
+        'SELECT status_id FROM waybill_statuses WHERE status_code = $1', ['BOOKED']
+      );
+      if (bookedStatus.rows.length === 0) {
+        throw Object.assign(new Error('BOOKED status not found in reference data'), { statusCode: 500 });
+      }
+      const paymentStatus = await client.query(
+        'SELECT payment_id FROM payment_statuses WHERE payment_code = $1',
+        [waybillData.payment_status_code || 'UNPAID']
+      );
+      if (paymentStatus.rows.length === 0) {
+        throw Object.assign(new Error('Invalid payment status code'), { statusCode: 400 });
+      }
+
+      const waybillId = await this.generateWaybillId(client);
 
       // 1. Insert the waybill
       const waybillQuery = `
@@ -51,17 +81,17 @@ class AutoDeductionEngine {
         RETURNING *
       `;
       const waybillValues = [
-        waybillData.waybill_id, waybillData.voyage_id, waybillData.shipper_id, 
-        waybillData.consignee_id, waybillData.current_status_id, waybillData.payment_status_id,
-        waybillData.cargo_description, waybillData.quantity, waybillData.total_weight_kg,
-        waybillData.cargo_type, waybillData.cargo_sqft, waybillData.booked_rooms,
+        waybillId, waybillData.voyage_id, waybillData.shipper_id, 
+        waybillData.consignee_id, bookedStatus.rows[0].status_id, paymentStatus.rows[0].payment_id,
+        waybillData.cargo_description, waybillData.quantity || 1, waybillData.total_weight_kg,
+        waybillData.cargo_type, waybillData.cargo_sqft, waybillData.booked_rooms || 0,
         waybillData.freight_charge, waybillData.vehicle_plate, waybillData.payment_mode,
         waybillData.official_receipt_no
       ];
       const waybillResult = await client.query(waybillQuery, waybillValues);
       const newWaybill = waybillResult.rows[0];
 
-      // 2. Deduct voyage capacity atomically
+      // 2. Deduct voyage capacity atomically (row-locked by UPDATE, serializes concurrent bookings)
       const deduction = await this.deductCapacity(
         client,
         newWaybill.waybill_id,
@@ -71,22 +101,73 @@ class AutoDeductionEngine {
       );
 
       if (!deduction) {
-        throw new Error('Insufficient voyage capacity (sqft or rooms) for this booking.');
+        throw Object.assign(
+          new Error('Insufficient voyage capacity (sqft or rooms) for this booking.'),
+          { statusCode: 409 }
+        );
       }
+
+      // 3. Log the initial BOOKED status
+      await client.query(
+        `INSERT INTO waybill_status_log (waybill_id, updated_by_user, new_status_id, location_name, remarks)
+         VALUES ($1, $2, $3, $4, 'Waybill generated; capacity auto-deducted')`,
+        [waybillId, waybillData.created_by_user, bookedStatus.rows[0].status_id, waybillData.location_name || 'Booking Desk']
+      );
 
       await client.query('COMMIT');
       return {
-        success: true,
         waybill: newWaybill,
         remaining_voyage_capacity: deduction
       };
     } catch (err) {
       await client.query('ROLLBACK');
-      console.error('Booking transaction failed:', err.message);
+      throw err;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Cancels a waybill: restores capacity + removes the record, atomically.
+  // Only allowed while the waybill is still BOOKED (not yet gate-checked-in / loaded).
+  async cancelWaybill(waybillId, userId) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      const wb = await client.query(
+        `SELECT w.waybill_id, w.voyage_id, w.cargo_sqft, w.booked_rooms, ws.status_code
+         FROM waybills w
+         JOIN waybill_statuses ws ON w.current_status_id = ws.status_id
+         WHERE w.waybill_id = $1
+         FOR UPDATE`,
+        [waybillId]
+      );
+      if (wb.rows.length === 0) {
+        throw Object.assign(new Error('Waybill not found'), { statusCode: 404 });
+      }
+      const waybill = wb.rows[0];
+      if (waybill.status_code !== 'BOOKED') {
+        throw Object.assign(
+          new Error(`Cannot cancel waybill in status ${waybill.status_code}. Only BOOKED waybills can be cancelled.`),
+          { statusCode: 409 }
+        );
+      }
+
+      // Restore capacity first, then delete (waybill_status_log & truck_arrivals cascade)
+      const restored = await this.restoreCapacity(
+        client, waybill.voyage_id, waybill.cargo_sqft, waybill.booked_rooms
+      );
+
+      await client.query('DELETE FROM waybills WHERE waybill_id = $1', [waybillId]);
+
+      await client.query('COMMIT');
       return {
-        success: false,
-        error: err.message
+        cancelled: waybillId,
+        remaining_voyage_capacity: restored
       };
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
     } finally {
       client.release();
     }
