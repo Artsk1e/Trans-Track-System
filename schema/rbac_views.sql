@@ -20,8 +20,8 @@ JOIN voyages v ON w.voyage_id = v.voyage_id
 JOIN waybill_statuses ws ON w.current_status_id = ws.status_id
 LEFT JOIN truck_arrivals ta ON w.waybill_id = ta.waybill_id;
 
--- 2. OIC LOADMASTER VIEW: Focuses on Voyage planning and loading operations.
-CREATE OR REPLACE VIEW v_oic_voyage_operations AS
+-- 2. VOYAGE OPERATIONS VIEW: Focuses on Voyage planning and loading operations.
+CREATE OR REPLACE VIEW v_voyage_operations AS
 SELECT 
     v.voyage_id,
     v.voyage_number,

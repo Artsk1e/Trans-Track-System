@@ -32,7 +32,7 @@ app.use(express.json());
 
 const authRoutes = require('./routes/authRoutes');
 const gateRoutes = require('./routes/gateRoutes');
-const oicRoutes = require('./routes/oicRoutes');
+const operationsRoutes = require('./routes/operationsRoutes');
 const executiveRoutes = require('./routes/executiveRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const publicRoutes = require('./routes/publicRoutes');
@@ -41,7 +41,7 @@ const masterRoutes = require('./routes/masterRoutes');
 // ...
 app.use('/api/auth', authRoutes);
 app.use('/api/gate', gateRoutes);
-app.use('/api/oic', oicRoutes);
+app.use('/api/operations', operationsRoutes);
 app.use('/api/executive', executiveRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/public', publicRoutes);
