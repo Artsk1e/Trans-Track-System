@@ -8,6 +8,8 @@ const pool = new Pool({
   host: String(process.env.DB_HOST || 'localhost'),
   port: Number(process.env.DB_PORT || 5432),
   database: String(process.env.DB_NAME || 'Trans_Track'),
+  // Supabase (and any remote Postgres) requires TLS; local dev does not.
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('connect', () => {
