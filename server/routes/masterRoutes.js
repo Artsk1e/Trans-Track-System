@@ -7,7 +7,7 @@ const router = express.Router();
 // All master-data routes are protected
 router.use(authenticateToken);
 
-const OPERATIONS_STAFF = ['GATE_CLERK', 'OIC_LOADMASTER', 'ADMIN'];
+const OPERATIONS_STAFF = ['GATE_CLERK', 'ADMIN'];
 const ADMIN_ONLY = ['ADMIN'];
 
 // ---------------------------------------------------------------------------
@@ -104,10 +104,16 @@ router.patch('/ports/:id', authorizeRoles(...ADMIN_ONLY), async (req, res, next)
 // VOYAGES (OIC schedules them — starts at full vessel capacity)
 // ---------------------------------------------------------------------------
 router.get('/voyages', authorizeRoles(...OPERATIONS_STAFF), async (req, res, next) => {
-  try { res.json({ success: true, data: await MasterService.listVoyages() }); } catch (e) { next(e); }
+  try { 
+    res.json({ success: true, data: await MasterService.listVoyages() }); 
+  } 
+  
+  catch (e) { 
+    next(e); 
+  }
 });
 
-router.post('/voyages', authorizeRoles('OIC_LOADMASTER', 'ADMIN'), async (req, res, next) => {
+router.post('/voyages', authorizeRoles('ADMIN'), async (req, res, next) => {
   try {
     const { vessel_id, origin_port_id, destination_port_id, voyage_number, departure, estimated_arrival } = req.body;
     if (!vessel_id || !origin_port_id || !destination_port_id || !voyage_number || !departure || !estimated_arrival) {
@@ -126,7 +132,7 @@ router.post('/voyages', authorizeRoles('OIC_LOADMASTER', 'ADMIN'), async (req, r
   }
 });
 
-router.patch('/voyages/:id', authorizeRoles('OIC_LOADMASTER', 'ADMIN'), async (req, res, next) => {
+router.patch('/voyages/:id', authorizeRoles('ADMIN'), async (req, res, next) => {
   try {
     const voyage = await MasterService.updateVoyage(req.params.id, req.body);
     if (!voyage) return res.status(404).json({ success: false, error: 'Voyage not found or nothing to update' });

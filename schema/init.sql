@@ -35,7 +35,7 @@ DROP TYPE IF EXISTS ping_type_enum CASCADE;
 CREATE TYPE vessel_type_enum AS ENUM ('PASSENGER_CARGO', 'CARGO_ONLY', 'RORO');
 CREATE TYPE vessel_status_enum AS ENUM ('ACTIVE', 'MAINTENANCE', 'INACTIVE');
 CREATE TYPE client_type_enum AS ENUM ('SHIPPER', 'CONSIGNEE', 'BOTH');
-CREATE TYPE user_role_enum AS ENUM ('GATE_CLERK', 'OIC_LOADMASTER', 'EXECUTIVE', 'ADMIN');
+CREATE TYPE user_role_enum AS ENUM ('GATE_CLERK', 'EXECUTIVE', 'ADMIN');
 CREATE TYPE cargo_type_enum AS ENUM ('ROLLING_CARGO', 'LOOSE_CARGO', 'CONTAINER');
 CREATE TYPE payment_mode_enum AS ENUM ('PREPAID', 'COLLECT', 'ACCOUNT');
 CREATE TYPE voyage_status_enum AS ENUM ('SCHEDULED', 'BOARDING', 'DEPARTED', 'ARRIVED', 'CANCELLED');
@@ -208,10 +208,6 @@ ON CONFLICT (status_code) DO NOTHING;
 
 INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
     ('admin', '$2b$10$super_secret_admin_password', 'Admin', 'Admin', 'ADMIN')
-ON CONFLICT (username) DO NOTHING;
-
-INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES
-    ('oic', '$2b$10$super_secret_oic_password', 'OIC', 'Loadmaster', 'OIC_LOADMASTER')
 ON CONFLICT (username) DO NOTHING;
 
 INSERT INTO users (username, password_hash, first_name, last_name, role) VALUES

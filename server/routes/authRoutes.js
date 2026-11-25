@@ -18,7 +18,7 @@ router.post(
     body('password', 'Password must be 6+ characters long').isLength({ min: 6 }),
     body('first_name', 'First name is required').not().isEmpty(),
     body('last_name', 'Last name is required').not().isEmpty(),
-    body('role', 'Valid role required').isIn(['GATE_CLERK', 'OIC_LOADMASTER', 'EXECUTIVE', 'ADMIN'])
+    body('role', 'Valid role required').isIn(['GATE_CLERK', 'EXECUTIVE', 'ADMIN'])
   ],
   async (req, res, next) => {
     const errors = validationResult(req);

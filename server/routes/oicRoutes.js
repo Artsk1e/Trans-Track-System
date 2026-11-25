@@ -6,11 +6,11 @@ const router = express.Router();
 
 // @route   GET /api/oic/voyages
 // @desc    Get voyages with capacity for deck allocation
-// @access  OIC_LOADMASTER, ADMIN
+// @access  ADMIN
 router.get(
   '/voyages',
   authenticateToken,
-  authorizeRoles('OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('ADMIN'),
   async (req, res, next) => {
     try {
       const voyages = await OicService.getVoyages(req.query.status);
@@ -23,11 +23,11 @@ router.get(
 
 // @route   GET /api/oic/voyages/:id/waybills
 // @desc    Get waybills assigned to a voyage
-// @access  OIC_LOADMASTER, ADMIN
+// @access  ADMIN
 router.get(
   '/voyages/:id/waybills',
   authenticateToken,
-  authorizeRoles('OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('ADMIN'),
   async (req, res, next) => {
     try {
       const waybills = await OicService.getVoyageWaybills(req.params.id);
@@ -40,11 +40,11 @@ router.get(
 
 // @route   POST /api/oic/voyages/:id/load
 // @desc    Mark waybills as loaded onto the vessel
-// @access  OIC_LOADMASTER, ADMIN
+// @access  ADMIN
 router.post(
   '/voyages/:id/load',
   authenticateToken,
-  authorizeRoles('OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('ADMIN'),
   async (req, res, next) => {
     try {
       const { waybill_ids } = req.body;
@@ -61,11 +61,11 @@ router.post(
 
 // @route   GET /api/oic/drivers/active
 // @desc    Get drivers with latest telemetry
-// @access  OIC_LOADMASTER, ADMIN
+// @access  ADMIN
 router.get(
   '/drivers/active',
   authenticateToken,
-  authorizeRoles('OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('ADMIN'),
   async (req, res, next) => {
     try {
       const drivers = await OicService.getActiveDrivers();

@@ -6,11 +6,11 @@ const router = express.Router();
 
 // @route   POST /api/waybills
 // @desc    Generate a waybill: auto-deducts voyage capacity atomically
-// @access  GATE_CLERK, OIC_LOADMASTER, ADMIN
+// @access  GATE_CLERK, ADMIN
 router.post(
   '/',
   authenticateToken,
-  authorizeRoles('GATE_CLERK', 'OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('GATE_CLERK', 'ADMIN'),
   async (req, res, next) => {
     try {
       const {
@@ -66,11 +66,11 @@ router.post(
 
 // @route   POST /api/waybills/:id/cancel
 // @desc    Cancel a BOOKED waybill: restores voyage capacity atomically
-// @access  GATE_CLERK, OIC_LOADMASTER, ADMIN
+// @access  GATE_CLERK, ADMIN
 router.post(
   '/:id/cancel',
   authenticateToken,
-  authorizeRoles('GATE_CLERK', 'OIC_LOADMASTER', 'ADMIN'),
+  authorizeRoles('GATE_CLERK', 'ADMIN'),
   async (req, res, next) => {
     try {
       const result = await engine.cancelWaybill(req.params.id, req.user.user_id);
