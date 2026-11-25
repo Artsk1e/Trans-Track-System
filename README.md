@@ -1,125 +1,168 @@
 # Trans-Track: Operational Fleet & Cargo Visibility System
 
-> **A logistics command center for Trans-Asia Shipping Lines (Iligan City Branch) bridging ground-truth maritime operations and executive digital oversight.**
+> A logistics command center for Trans-Asia Shipping Lines (Iligan City Branch), bridging ground-truth maritime operations and executive digital oversight.
+
+**Trans-Track** digitizes daily port ground operations — waybill booking, vessel deck allocation, gate check-in, driver GPS/SMS telemetry, and live capacity dashboards — replacing the manual clipboards and Viber threads that previously made the branch dependent on one person (the Officer-in-Charge).
+
+| Operational problem | Trans-Track solution |
+| :--- | :--- |
+| Rolling cargo blind spots (no visibility on incoming trucks) | Driver SMS/GPS telemetry with real-time location pings |
+| Vessel loading delays (unknown truck arrival times) | Deck pre-allocation + auto-deducting voyage capacity engine |
+| Manual Viber executive reporting | Read-only executive dashboard with live capacity metrics |
+| Client interruptions to the OIC | Public self-service portal: schedule lookup + waybill tracking |
 
 ---
 
-## Executive Summary
+## Tech Stack
 
-**Trans-Track** is a role-based logistics web application designed for **Trans-Asia Shipping Lines** (Iligan City Branch) to resolve severe information asymmetry and key-person dependency centered on the Officer-in-Charge (OIC) and Branch Manager.
+| Layer | Technology |
+| :--- | :--- |
+| Frontend | React 19 + TypeScript, Vite, Tailwind CSS 3, Radix UI, React Router 7 |
+| Backend | Node.js + Express 5 (REST API, CommonJS) |
+| Database | PostgreSQL — hosted on **Supabase** (`db.uuvkomzzcwfyrtqqkhwh.supabase.co`), local PostgreSQL 16 as fallback |
+| Auth | JWT (access + refresh), bcrypt password hashing |
+| Security | helmet, express-rate-limit, express-validator, role-based access control (RBAC) |
+| Testing | Playwright end-to-end suite (`client/e2e/`) |
 
-While executive-level financial metrics are successfully digitized, daily ground operations previously relied entirely on manual clipboards, unorganized Viber threads, and direct phone calls. Trans-Track digitizes ground operations—connecting Field Operations, Clients, and Upper Management into a unified command platform.
+## Roles & Access
 
----
+Three staff roles can log in. **Clients do not log in** — they use the public tracking pages only.
 
-## The Core Problems Solved
-
-| Operational Crisis | Impact | Trans-Track Solution |
+| Role | Username (demo) | Can do |
 | :--- | :--- | :--- |
-| **Rolling Cargo Blind Spots** | Management has zero visibility on incoming trucks until they reach the port gate. | **Driver SMS/GPS Telemetry**: Real-time location pings provide accurate truck ETAs. |
-| **Vessel Loading Delays** | Unknown truck arrival times force chaotic, last-minute deck space allocation. | **Pre-Allocation Engine**: Loadmasters pre-allocate ship deck space prior to arrival. |
-| **Manual Viber Executive Reporting** | Upper management manually messages the OIC to check cabin & deck space availability. | **Read-Only Executive Dashboard**: Live auto-deducting cabin room and cargo deck space view. |
-| **Client Interruption & OIC Burnout** | Customers call the OIC directly (even on weekends) to check schedules and waybill status. | **Trans-Serve Self-Service Portal**: Public tracking lookup and vessel schedule board. |
+| `GATE_CLERK` | `clerk` / `clerk123` | Waybill tracking, truck check-in at the gate, status updates |
+| `EXECUTIVE` | `exec` / `exec123` | Read-only dashboards: revenue, capacity utilization |
+| `ADMIN` | `admin` / `admin123` | Everything: voyage loading/deck allocation, user management, master data, audit |
+| *(client)* | — no login — | Public schedule lookup + waybill tracking by waybill number / GPS token |
 
 ---
 
-## System Architecture & 3-Tier Module Breakdown
+## Quick Start
 
-```
-                       +-----------------------------------+
-                       |    TRANS-TRACK COMMAND CENTER     |
-                       +-----------------------------------+
-                                         |
-         +-------------------------------+-------------------------------+
-         |                               |                               |
-         v                               v                               v
-+------------------+           +-------------------+           +-------------------+
-| FIELD OPERATIONS |           |  CLIENT PORTAL    |           | EXECUTIVE VIEW    |
-| (Driver SMS &    |           |  (Trans-Serve     |           | (Capacity         |
-| Gate Staging)    |           |   Self-Service)   |           |  Dashboard)       |
-+------------------+           +-------------------+           +-------------------+
-```
+### 1. Database
 
-### 1. Driver SMS Tracking (Field Operations View)
-* **Zero App Installation**: Drivers receive an expiring tracking link via SMS.
-* **Dual Telemetry**: Tapping the link pings browser GPS coordinates; a two-way SMS fallback handles low-data mobile coverage.
-* **Proactive Deck Allocation**: Feeds accurate ETAs into the OIC Dispatch Dashboard, allowing loadmasters to pre-assign ship deck space before trucks hit the pier.
+**Option A — Supabase (current setup):** create a project at [supabase.com](https://supabase.com), then restore the schema+data dump (see `docs/database/SCHEMA.md`) or run the SQL files below in the Supabase SQL editor, in order:
 
-### 2. Trans-Serve Client Portal (Client View)
-* **Self-Service Tracker**: Customers enter their waybill number to monitor cargo progression across 7 standardized lifecycle stages.
-* **Vessel Schedule Board**: Public display of active voyage schedules and departure times.
-* **Auto-Responder Integration**: SMS/Viber auto-responders automatically redirect client inquiries to the portal.
+1. `schema/init.sql` — tables, enums, indexes, base seed users
+2. `schema/audit_triggers.sql` — audit logging triggers
+3. `schema/rbac_views.sql` — role-scoped views (`v_voyage_operations`, executive views)
+4. `schema/seed_baseline.sql` — idempotent demo data (ports, vessels, clients, voyages, 1 waybill)
 
-### 3. Executive Capacity Dashboard (Executive View)
-* **Live Deck & Cabin Monitoring**: Real-time read-only view of remaining vessel deck square footage (`total_deck_sqft`) and cabin room accommodations.
-* **Auto-Deduction Engine**: Deducts cargo square footage and booked rooms the exact second a waybill is generated at the gate.
+**Option B — local PostgreSQL:** create a database, then run the same four files against it.
 
----
+### 2. Backend
 
-## 3-Phase Operational Workflow
-
-### **Phase 1: Fleet Tracking & Deck Allocation**
-1. Automated SMS tracking link sent to the driver's mobile device.
-2. Driver taps GPS link (or text reply triggers SMS fallback).
-3. Driver location and accurate ETA pinged to the OIC Dispatch Dashboard.
-4. Loadmaster pre-allocates ship deck space to eliminate loading delays.
-
-### **Phase 2: Port Arrival & Executive Reporting**
-1. Truck arrives at the port gate; staff process entry via a **Single-Entry Gate** schema (`waybill_id` UNIQUE) to prevent double encoding.
-2. Backend algorithm deducts allocated cargo space from `voyages.remaining_sqft` and `remaining_rooms`.
-3. Live updates instantly push to the **Executive Capacity Dashboard**.
-
-### **Phase 3: Client Self-Service**
-1. Client contacts OIC via SMS/Viber and receives an automated link redirection.
-2. Client accesses the **Trans-Serve Client Portal** to independently check vessel schedules and cargo status progress bars.
-
----
-
-## Relational Database Architecture
-
-The system is built on a **11-table PostgreSQL relational database** designed for low-bandwidth environments at the pier:
-
-```
-                          +-------------------+
-                          |       PORTS       |
-                          +---------+---------+
-                                    |
-                                    v
-+-------------------+     +-------------------+     +-------------------+
-|      VESSELS      |---->|      VOYAGES      |<----|      CLIENTS      |
-+-------------------+     +---------+---------+     +-------------------+
-                                    |
-                                    v
-+-------------------+     +-------------------+     +-------------------+
-| PAYMENT_STATUSES  |---->|     WAYBILLS      |<----| WAYBILL_STATUSES  |
-+-------------------+     +----+----+---------+     +-------------------+
-                               |    |
-             +-----------------+    +-----------------+
-             |                                        |
-             v                                        v
-+-------------------+                      +-------------------+
-|  TRUCK_ARRIVALS   |                      | WAYBILL_STATUS_LOG|
-+---------+---------+                      +-------------------+
-          |
-          v
-+-------------------+
-|DRIVER_LOCATION_PINGS|
-+-------------------+
+```bash
+npm install                 # from repo root
+cp server/.env.example server/.env   # then fill in values (see below)
+npm run dev                 # nodemon, or: npm start
 ```
 
-### Table Summary
-* **Master Reference**: `ports`, `vessels`, `payment_statuses`, `waybill_statuses`
-* **Core Operations**: `voyages`, `clients`, `users`, `waybills`
-* **Telemetry & Execution**: `truck_arrivals`, `driver_location_pings`, `waybill_status_log`
+Backend runs on **http://localhost:5000**.
+
+### 3. Frontend
+
+```bash
+cd client
+npm install
+npm run dev                 # http://localhost:5173
+```
+
+### Environment variables (`server/.env`)
+
+| Variable | Description |
+| :--- | :--- |
+| `PORT` | Backend port (default `5000`) |
+| `DB_USER` / `DB_PASSWORD` | Database credentials (`postgres` / set at Supabase project creation) |
+| `DB_HOST` / `DB_PORT` / `DB_NAME` | `db.xxxx.supabase.co`, `5432`, `postgres` (or `localhost`/`5432`/`Trans_Track` for local) |
+| `DB_SSL` | `true` for Supabase (TLS required), omit/false for local |
+| `JWT_SECRET` | Random 64-hex string — generate with `openssl rand -hex 32` |
+
+⚠️ `.env` files are **never committed** — `.gitignore` blocks all `.env*` including templates.
 
 ---
 
-## Tech Stack & Prerequisites
+## Project Structure
 
-* **Frontend**: React.js, Tailwind CSS
-* **Backend**: Node.js, Express.js
-* **Database**: PostgreSQL (PERN Stack)
-* **Telemetry**: Browser Geolocation API / SMS Gateway Integration
+```
+├── server/                     Express backend
+│   ├── server.js               Entry point; middleware chain + route mounting
+│   ├── db.js                   pg Pool (SSL-aware for Supabase)
+│   ├── middleware/             authMiddleware.js — JWT verify + authorizeRoles guard
+│   ├── routes/                 One file per API area (thin: validate → authorize → delegate)
+│   ├── services/               Business logic (orchestration, transactions)
+│   │   └── autoDeductionEngine.js   ACID booking/cancellation with atomic capacity math
+│   ├── models/                 OOP entity classes matching the class diagram
+│   │   ├── baseEntity.js       Abstract base
+│   │   └── Waybill.js, Voyage.js, Vessel.js, Client.js, User.js, Port.js,
+│   │       TruckArrival.js, DriverLocationPing.js, WaybillStatusLog.js
+│   └── seeds/test-data.sql     QA test users
+├── client/                     React frontend (atomic design)
+│   ├── src/components/ui/      Base primitives (Button, TextInput, Dialog, Table…)
+│   ├── src/components/molecules/  Composite cards/forms (track-form, search-panel…)
+│   ├── src/components/organisms/  Domain sections (sidebar, data-table, auth-card…)
+│   ├── src/pages/              Route views (dashboard, waybills, deck-allocation,
+│   │                           schedule, track, login)
+│   ├── src/contexts/           auth-context (login, token, role mapping)
+│   ├── src/layouts/            app-shell / auth-shell
+│   └── e2e/                    Playwright specs per feature + infra
+├── schema/                     SQL: init, audit triggers, RBAC views, demo seed
+├── docs/                       Project documentation (see docs/README.md)
+└── Docs/                       Original design assets (mockups, diagrams, PDFs)
+```
+
+**Layering rule:** `routes/` never touch SQL directly — they call `services/`, which use `models/` (or the pool) for data access.
 
 ---
 
+## API Overview
+
+Base URL: `http://localhost:5000/api` — full request/response contracts in [`docs/api/contracts.md`](docs/api/contracts.md).
+
+| Mount | Routes file | Access | Purpose |
+| :--- | :--- | :--- | :--- |
+| `/api/auth` | authRoutes.js | public | Login, refresh, me, staff registration |
+| `/api/public` | publicRoutes.js | no auth | Schedule lookup, waybill tracking, GPS telemetry ingest |
+| `/api/gate` | gateRoutes.js | GATE_CLERK, ADMIN | Truck check-in, status updates, GPS token generation |
+| `/api/waybills` | waybillRoutes.js | GATE_CLERK, ADMIN | Waybill booking (auto-deducts capacity), cancellation (restores) |
+| `/api/operations` | operationsRoutes.js | ADMIN | Voyage loading, deck allocation, driver telemetry monitor |
+| `/api/master` | masterRoutes.js | mixed (see file) | Master data encoding: clients, vessels, ports, voyages |
+| `/api/executive` | executiveRoutes.js | EXECUTIVE | Read-only capacity/revenue dashboards |
+| `/api/admin` | adminRoutes.js | ADMIN | User management, audit logs |
+
+## Key Behaviors
+
+- **Auto-deduction engine** (`server/services/autoDeductionEngine.js`): booking a waybill atomically deducts deck sqft / cabin rooms inside a transaction; overbooking returns **409**; cancellation restores capacity. New voyages always start at full vessel capacity.
+- **Telemetry loop**: gate check-in generates a one-time GPS token → public `GET /api/public/track/:token` for the driver → `POST /api/public/track/:token/pings` ingests SMS/GPS location replies (parsed by `DriverLocationPing.processSmsReply`).
+- **No hard deletes on master data**: vessels/clients are soft-deactivated to protect waybill history.
+- **Audit trail**: `audit_triggers.sql` writes every INSERT/UPDATE/DELETE on sensitive tables to an audit log.
+- **Demo data**: seeded rows are marked "DEMO" and meant to be replaced via the master-data API when real data arrives.
+
+## Testing
+
+```bash
+cd client
+npm run test:e2e              # Playwright suite (needs backend on :5000 + frontend dev server)
+npm run lint                  # oxlint
+npm run build                 # tsc + vite build check
+```
+
+The e2e specs (`client/e2e/`) cover login/RBAC, waybill booking + auto-deduction, deck allocation, tracking, a11y, and slow-network throttling.
+
+## Git Conventions
+
+- Branch names: `feature/<topic>` / `docs--<topic>`
+- Commits follow **Conventional Commits**: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:` — scope suffix for frontend-only work (e.g. `feat(client): …`)
+- Frontend and backend are committed separately; `client/` UI work may lag backend work
+
+## Where to Look
+
+| I want to… | Look at… |
+| :--- | :--- |
+| Understand the API contract | `docs/api/contracts.md` |
+| Understand the database | `docs/database/SCHEMA.md` + `schema/init.sql` |
+| Understand security/RBAC | `docs/architecture/SECURITY_ARCHITECTURE.md` |
+| Add an endpoint | `server/routes/` (+ `services/` for logic) |
+| Add a UI page | `client/src/pages/` + route in `client/src/App.tsx` |
+| Change DB structure | `schema/init.sql` (schema changes are applied manually — see docs/README.md) |
+| Original business design | `Docs/` (mockups, ERD, use case diagrams, PDF) |
