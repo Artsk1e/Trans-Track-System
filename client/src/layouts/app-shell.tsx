@@ -34,11 +34,13 @@ export function AppShell({
         activeRoute={activeRoute}
         onNavigate={onNavigate}
         onLogout={onLogout}
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
       />
 
       <div className="flex-1 flex flex-col min-w-0 lg:ml-[var(--sidebar-width)]">
         <TopBar
-          title={activeRoute === '/waybills' ? 'Waybills' : activeRoute === '/deck-allocation' ? 'DECK ALLOCATION / CARGO SPACE' : 'Dashboard'}
+          title={activeRoute === '/waybills' ? 'Waybills' : activeRoute === '/deck-allocation' ? 'Deck Allocation' : 'Dashboard'}
           role={role}
           userName={userName}
           unreadNotifications={unreadNotifications}
