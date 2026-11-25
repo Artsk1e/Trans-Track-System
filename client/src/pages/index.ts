@@ -1,0 +1,6 @@
+export { LoginPage } from './login-page'
+export { WaybillsPage } from './waybills-page'
+export { DashboardPage } from './dashboard-page'
+export { DeckAllocationPage } from './deck-allocation-page'
+export { TrackPage } from './track-page'
+export { SchedulePage } from './schedule-page'
