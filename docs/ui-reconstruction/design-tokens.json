@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "source": "docs/ui-screenshots/web/ui-analysis.json",
+  "colors": {
+    "primary": {
+      "DEFAULT": "#14304F",
+      "dark": "#0D2238",
+      "overlay": "#12294A"
+    },
+    "page": "#E1E8F5",
+    "heading": "#16293F",
+    "slate": "#3B4C63",
+    "brandYellow": "#FFD81B",
+    "gold": {
+      "line": "#E3C54A",
+      "link": "#C9A800"
+    },
+    "success": {
+      "bg": "#66FF66",
+      "text": "#0B8A1F"
+    },
+    "warning": "#F5822A",
+    "info": "#2F6FED",
+    "chartGreen": "#3DC47A",
+    "authCard": "#34475A",
+    "authOverlay": "#0B1624",
+    "surface": "#FFFFFF",
+    "textPrimary": "#16293F",
+    "textMuted": "#9CA3AF",
+    "inputBorder": "#1A1A1A",
+    "error": "#DC2626"
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": ["Inter", "system-ui", "sans-serif"]
+    },
+    "heading": {
+      "h1": { "size": "32px", "weight": "700", "lineHeight": "1.2" },
+      "h2": { "size": "20px", "weight": "600", "lineHeight": "1.3" },
+      "h3": { "size": "18px", "weight": "600", "lineHeight": "1.4" }
+    },
+    "body": {
+      "DEFAULT": { "size": "16px", "weight": "400", "lineHeight": "1.5" },
+      "large": { "size": "17px", "weight": "400", "lineHeight": "1.5" }
+    },
+    "statValue": { "size": "32px", "weight": "500", "lineHeight": "1" },
+    "smallCaption": { "size": "14px", "weight": "400", "lineHeight": "1.4" },
+    "buttonLabel": { "size": "18px", "weight": "600", "lineHeight": "1" },
+    "weightsUsed": [400, 500, 600, 700]
+  },
+  "spacing": {
+    "baseUnit": "4px",
+    "scale": [4, 8, 12, 16, 20, 24, 32, 48]
+  },
+  "borderRadius": {
+    "card": "24px",
+    "control": "16px",
+    "pill": "9999px",
+    "navPill": "20px",
+    "badge": "9999px"
+  },
+  "shadows": {
+    "DEFAULT": "none",
+    "subtle": "0 1px 2px 0 rgb(0 0 0 / 0.05)"
+  },
+  "icons": {
+    "library": "lucide-react",
+    "style": "filled",
+    "color": "currentColor",
+    "set": ["home", "document-edit", "bar-chart", "truck", "check-circle", "box", "clock", "pie", "ship", "bell", "user-circle", "logout", "info", "chevron-down", "chevron-right", "search", "plus", "download", "eye", "eye-off"]
+  },
+  "layout": {
+    "sidebarWidth": "256px",
+    "headerHeight": "64px",
+    "contentPadding": "24px",
+    "sectionSpacing": "16px",
+    "gutter": "20px",
+    "columns": 12
+  },
+  "breakpoints": {
+    "mobile": "640px",
+    "tablet": "768px",
+    "desktop": "1024px",
+    "wide": "1280px"
+  },
+  "components": {
+    "Button": {
+      "variants": ["primary", "secondary", "ghost", "link", "danger"],
+      "sizes": ["sm", "md", "lg", "full-width"],
+      "radius": "16px",
+      "height": { "sm": "31px", "md": "45px", "lg": "61px" }
+    },
+    "TextInput": {
+      "variants": ["default", "auth", "search"],
+      "radius": "16px",
+      "height": { "default": "45px", "auth": "69px", "search": "45px" }
+    },
+    "Select": {
+      "radius": "16px",
+      "height": "45px",
+      "caretPosition": "right"
+    },
+    "StatusBadge": {
+      "radius": "9999px",
+      "height": "29px",
+      "paddingX": "16px",
+      "variants": ["success", "warning", "info", "default"]
+    },
+    "Card": {
+      "radius": "24px",
+      "padding": "28px",
+      "bg": "#FFFFFF"
+    },
+    "Table": {
+      "headerBg": "#E1E8F5",
+      "rowBorder": "#E3C54A",
+      "rowBorderWidth": "1px",
+      "headerRadius": "16px"
+    }
+  },
+  "accessibility": {
+    "focusRing": {
+      "width": "2px",
+      "color": "#FFD81B",
+      "offset": "2px"
+    },
+    "minTouchTarget": "44px",
+    "contrastTarget": "AA"
+  },
+  "knownIssues": {
+    "contrastFailures": [
+      { "element": "success badge text", "fg": "#0B8A1F", "bg": "#66FF66", "ratio": "~2.5:1", "fix": "darken bg or lighten text" },
+      { "element": "gold link", "fg": "#C9A800", "bg": "#FFFFFF", "ratio": "~2.3:1", "fix": "darken gold to #B89600" },
+      { "element": "placeholder text", "fg": "#9CA3AF", "bg": "#FFFFFF", "ratio": "<3:1", "fix": "darken to #6B7280" }
+    ],
+    "dataInconsistencies": [
+      { "screen": "Deck Allocation", "issue": "Allocated rows sum 19,000 sqft but 50,000 - 18,000 remaining = 32,000 used" }
+    ],
+    "typos": [
+      { "screen": "Login", "text": "Login aa staff", "correction": "Login as staff" },
+      { "screen": "Dashboard", "text": "Todays Shipment Status", "correction": "Today's Shipment Status" },
+      { "screen": "Waybills", "text": "New Waybills", "correction": "New Waybill" }
+    ],
+    "missingStates": [
+      "hover", "focus", "loading", "error", "empty", "disabled"
+    ]
+  }
+}

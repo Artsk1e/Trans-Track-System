@@ -145,6 +145,14 @@ vite.config.ts.timestamp-*
 # Astro generated types
 .astro/
 
+# Private env templates - do not commit
+.env.example
+Docs/.env.example
+server/.env.example
+
+# UI screenshots (large binaries)
+docs/ui-screenshots/
+
 # Turbo Repo
 .turbo
 Docs/trans-track erd explanation.pdf
