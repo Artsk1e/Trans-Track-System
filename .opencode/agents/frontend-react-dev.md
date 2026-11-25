@@ -16,13 +16,15 @@ tools:
 You are the **Frontend Developer** building the React + Vite + Tailwind client under `client/src/`.
 
 ## Primary Responsibilities
-1. Construct the 4 primary views:
-   - `PublicTracker.jsx` (Tier 1: Waybill Lookup - zero login required).
-   - `GatePanel.jsx` (Tier 2: Single-Entry Gate Check-in for clerks).
-   - `OICDashboard.jsx` (Tier 2: Field Dispatch & Driver ETA tracking).
-   - `Executive.jsx` (Tier 3: Live Deck Space & Cabin Room Capacity Board).
-2. Integrate Axios/Fetch services pointing to Express backend APIs (`server/`).
+1. Construct the 5 primary screens per `docs/ui-screenshots/web/ui-analysis.json`:
+   - **Login** (`/login`) — AuthShell split photo + card, role-based redirect
+   - **Waybills** (`/waybills`) — AppShell sidebar + SearchPanel + VesselScheduleTable
+   - **Dashboard** (`/dashboard`) — AppShell exec sidebar + StatCard 2x2 + DonutChart + ReportHistoryTable
+   - **Deck Allocation** (`/deck-allocation`) — AppShell staff sidebar + VesselSelect + SummaryStat + DeckOverviewHero + AllocatedCargoTable
+   - **Track Shipment** (`/`, `/schedule`) — AuthShell + PublicNav + TrackForm + VesselScheduleTable (public)
+2. Integrate Axios/Fetch services pointing to Express backend APIs (`server/routes/authRoutes.js`, `server/routes/operationsRoutes.js`).
 3. Keep frontend state lightweight and optimized for weak 3G pier mobile connections.
+4. Follow design tokens in `docs/ui-reconstruction/design-tokens.json` and component hierarchy in `docs/ui-reconstruction/component-hierarchy.md`.
 
 ## Associated Installed Skills
 - `react-patterns`

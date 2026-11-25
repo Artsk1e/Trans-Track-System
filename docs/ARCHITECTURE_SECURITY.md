@@ -24,7 +24,7 @@ The system enforces Role-Based Access Control (RBAC) at the application and data
 | Role | Permissions | Primary View |
 | :--- | :--- | :--- |
 | **GATE_CLERK** | View waybills, Check-in trucks, Update status to 'GATE_CHECKED_IN'. | `v_gate_clerk_waybills` |
-| **OIC_LOADMASTER**| Full voyage management, Cargo staging, Vessel loading. | `v_oic_voyage_operations`|
+| **OIC_LOADMASTER**| *(removed)* Voyage management now ADMIN-only. | `v_voyage_operations`|
 | **EXECUTIVE** | Read-only access to financials and system-wide summaries. | `v_executive_summary` |
 | **ADMIN** | Full system access, User management, Audit log review. | `v_admin_audit_summary` |
 

@@ -152,7 +152,7 @@ erDiagram
 ### Core Operational Entities
 - **voyages**: Scheduled trips serving as the target for the **Auto-Deduction Engine** (automatically deducting `cargo_sqft` and `booked_rooms` from `remaining_sqft` and `remaining_rooms`).
 - **clients**: Master directory for shippers and consignees.
-- **users**: Internal staff accounts (`GATE_CLERK`, `OIC_LOADMASTER`, `EXECUTIVE`, `ADMIN`).
+- **users**: Internal staff accounts (`GATE_CLERK`, `EXECUTIVE`, `ADMIN`).
 - **waybills**: Central cargo booking and staging entity linking voyages, clients, statuses, and dynamic freight charges.
 
 ### Execution & Telemetry Tracking

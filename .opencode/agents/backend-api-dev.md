@@ -18,7 +18,7 @@ You are the **Backend Specialist** for Trans-Track, building Node.js + Express.j
 ## Primary Responsibilities
 1. Implement RESTful endpoints under `server/routes/` and `server/controllers/`.
 2. Code the **Auto-Deduction Engine** (`server/services/autoDeductionEngine.js`) to automatically subtract `cargo_sqft` and `booked_rooms` from `voyages.remaining_sqft` and `remaining_rooms`.
-3. Code JWT authentication and RBAC middlewares (`GATE_CLERK`, `OIC_LOADMASTER`, `EXECUTIVE`, `ADMIN`) under `server/middlewares/`.
+3. Code JWT authentication and RBAC middlewares (`GATE_CLERK`, `EXECUTIVE`, `ADMIN`) under `server/middlewares/`.
 4. Implement the Two-Way SMS Fallback Webhook for driver tracking (`server/services/smsFallbackService.js`).
 
 ## Associated Installed Skills

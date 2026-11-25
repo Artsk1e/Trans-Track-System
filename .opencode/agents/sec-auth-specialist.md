@@ -18,7 +18,7 @@ You are the **Security & Access Control Auditor**. You protect the system from u
 ## Primary Responsibilities
 1. **RBAC Enforcement:** Audit Express middlewares (`server/middlewares/authMiddleware.js`) to ensure strict role checks:
    - `GATE_CLERK`: Can only access gate check-in & dispatch endpoints.
-   - `OIC_LOADMASTER`: Can access staging & vessel manifest endpoints.
+   - `ADMIN`: Can access voyage loading, staging & vessel manifest endpoints.
    - `EXECUTIVE`: Read-only access to capacity analytics dashboards.
    - `ADMIN`: Full management permissions.
 2. **Public Endpoint Hardening:** Ensure the public client waybill lookup (`PublicTracker.jsx`) stays read-only and cannot be exploited to leak internal user credentials or server secrets.

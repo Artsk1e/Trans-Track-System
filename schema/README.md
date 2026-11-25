@@ -27,7 +27,7 @@ The underlying PostgreSQL database schema is meticulously structured across **11
 ### B. Core Operational Entities
 - **`voyages`**: Scheduled trips between origin and destination ports maintaining dynamic capacity staging (`remaining_sqft`, `remaining_rooms`).
 - **`clients`**: Master directory for shippers, consignees, and commercial customers.
-- **`users`**: Internal staff accounts classified by role (`GATE_CLERK`, `OIC_LOADMASTER`, `EXECUTIVE`, `ADMIN`).
+- **`users`**: Internal staff accounts classified by role (`GATE_CLERK`, `EXECUTIVE`, `ADMIN`).
 - **`waybills`**: Central booking and cargo manifest entity linking shipments to voyages, clients, and payment records.
 
 ### C. Execution & Telemetry Tracking
