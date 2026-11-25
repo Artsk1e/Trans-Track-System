@@ -79,8 +79,15 @@ export function DataTable<T>({
               data.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className={cn('table-row-hover', onRowClick && 'cursor-pointer')}
+                  className={cn('table-row-hover', onRowClick && 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandYellow')}
                   onClick={() => onRowClick?.(row)}
+                  onKeyDown={(e) => {
+                    if (onRowClick && (e.key === 'Enter' || e.key === ' ')) {
+                      e.preventDefault()
+                      onRowClick(row)
+                    }
+                  }}
+                  tabIndex={onRowClick ? 0 : undefined}
                   role="row"
                 >
                   {columns.map((column) => (

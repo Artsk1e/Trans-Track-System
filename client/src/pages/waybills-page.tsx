@@ -2,8 +2,9 @@ import { AppShell } from '@/layouts/app-shell'
 import { SearchPanel } from '@/components/molecules/search-panel'
 import { VesselScheduleTable } from '@/components/organisms/vessel-schedule-table'
 import { DataTable, type WaybillResult, waybillColumns } from '@/components/organisms/data-table'
-import { Button } from '@/components/ui/button'
-import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { TextInput } from '@/components/ui/text-input'
+import { useState, useEffect, useRef } from 'react'
 
 const statusOptions = [
   { value: 'all', label: 'All Status' },
@@ -82,16 +83,49 @@ export function WaybillsPage() {
   const [loading, setLoading] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+  const [showNewWaybillDialog, setShowNewWaybillDialog] = useState(false)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Debounced search (300ms)
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      if (waybillValue.trim() || statusValue !== 'all') {
+        handleSearch()
+      }
+    }, 300)
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [waybillValue, statusValue])
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleSearch()
+      }
+    }
+    document.addEventListener('keydown', handleKeyPress)
+    return () => document.removeEventListener('keydown', handleKeyPress)
+  }, [waybillValue, statusValue])
 
   const handleSearch = () => {
     setLoading(true)
     setShowResults(true)
+    setCurrentPage(1)
     setTimeout(() => setLoading(false), 500)
   }
 
   const handleNewWaybill = () => {
-    // Open modal or navigate
-    console.log('New Waybills')
+    setShowNewWaybillDialog(true)
+  }
+
+  const handleCloseDialog = () => {
+    setShowNewWaybillDialog(false)
   }
 
   const handlePageChange = (page: number) => {
@@ -144,11 +178,49 @@ export function WaybillsPage() {
         />
       </div>
 
-      <div className="mt-6 flex justify-end" role="region" aria-label="Primary actions">
-        <Button variant="primary" size="md" onClick={() => console.log('Search Waybills')}>
-          Search Waybills
-        </Button>
-      </div>
+      <Dialog open={showNewWaybillDialog} onOpenChange={handleCloseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Waybill</DialogTitle>
+            <DialogDescription>
+              Create a new waybill for cargo shipment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-semibold text-slate mb-1.5 block" htmlFor="waybill-number">
+                Waybill Number
+              </label>
+              <TextInput
+                id="waybill-number"
+                placeholder="WB-2026-XXX"
+                variant="default"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate mb-1.5 block" htmlFor="cargo-type">
+                Cargo Type
+              </label>
+              <TextInput
+                id="cargo-type"
+                placeholder="e.g., Containers, Vehicles"
+                variant="default"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-semibold text-slate mb-1.5 block" htmlFor="space-used">
+                Space Used (sq.ft)
+              </label>
+              <TextInput
+                id="space-used"
+                type="number"
+                placeholder="0"
+                variant="default"
+              />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   )
 }

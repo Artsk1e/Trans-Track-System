@@ -78,7 +78,7 @@ export const SearchPanel = forwardRef<HTMLDivElement, SearchPanelProps>(
             className="flex-1 sm:flex-none"
           >
             <Icon name="Plus" size="sm" className="mr-2" aria-hidden="true" />
-            + New Waybills
+            New Waybill
           </Button>
         </div>
       </div>
